@@ -1,5 +1,5 @@
 package courseregistration;
-import java.io.Serializable;//reading from csv
+import java.io.Serializable;
 
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -9,7 +9,7 @@ public class User implements Serializable {
     private String firstName;
     private String lastName;
 
-    // Constructor
+    // Constructor to initialize user properties
     public User(String username, String password, String firstName, String lastName) {
         this.username = username;
         this.password = password;
@@ -17,43 +17,50 @@ public class User implements Serializable {
         this.lastName = lastName;
     }
 
-    // Getters and Setters
+    // Getter for username
     public String getUsername() {
         return username;
     }
 
+    // Setter for username
     public void setUsername(String username) {
         this.username = username;
     }
 
+    // Getter for password
     public String getPassword() {
         return password;
     }
 
-    // You might not want to have a setter for the password or if you do, ensure it's handled securely.
+    // Setter for password, ensuring that it's handled securely is important
     public void setPassword(String password) {
+        // Here you would include hashing or encryption as needed for security
         this.password = password;
     }
 
+    // Getter for first name
     public String getFirstName() {
         return firstName;
     }
 
+    // Setter for first name
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
 
+    // Getter for last name
     public String getLastName() {
         return lastName;
     }
 
+    // Setter for last name
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
 
-    // You can add additional methods that are common across User types here.
-    // For example, a method to display the user's full name.
+    // A method to get the full name of the user
     public String getFullName() {
         return firstName + " " + lastName;
     }
+
 }
