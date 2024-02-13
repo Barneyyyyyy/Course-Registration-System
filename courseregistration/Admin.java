@@ -53,8 +53,10 @@ public class Admin extends User implements AdminInterface {
     }
 
     public void registerStudent(Student student) {
-        // Add the student to the list of students
-        students.add(student);
+        if (students == null) {
+            students = new ArrayList<>(); // Initialize if null
+        }
+        students.add(student); // Add the student to the list
     }
 
     // ... Implement other methods as required by AdminInterface
