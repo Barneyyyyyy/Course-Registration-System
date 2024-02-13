@@ -1,8 +1,10 @@
 package courseregistration;
-import java.util.List;
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class Admin extends User implements AdminInterface {
+
     /**
 	 * 
 	 */
@@ -10,54 +12,59 @@ public class Admin extends User implements AdminInterface {
 	private List<Course> courses; // List to manage courses
     private List<Student> students; // List to manage students
 
-    public Admin(String username, String password, String firstName, String lastName) {
-        super(username, password, firstName, lastName);
-        this.courses = new ArrayList<>(); // Initialize an empty list of courses
-        this.students = new ArrayList<>(); // Initialize an empty list of students
+    // Hardcoded admin credentials for simplicity as per requirements
+    private static final String HARDCODED_USERNAME = "Admin";
+    private static final String HARDCODED_PASSWORD = "Admin001";
+
+    // Admin class constructor
+    public Admin() {
+        super(HARDCODED_USERNAME, HARDCODED_PASSWORD, "Admin", "Administrator");
+        this.courses = new ArrayList<>();
+        this.students = new ArrayList<>();
     }
 
+    // Authentication method
+    public boolean authenticate(String username, String password) {
+        return this.getUsername().equals(username) && this.getPassword().equals(password);
+    }
+
+    @Override
     public void createCourse(Course course) {
-        // Add the course to the list of courses
         courses.add(course);
     }
 
+    @Override
     public void deleteCourse(String courseId) {
-        // Remove a course from the list based on courseId
         courses.removeIf(course -> course.getCourseId().equals(courseId));
     }
 
+    @Override
     public void editCourse(String courseId, Course newCourseData) {
-        // Find the course and update its data
-        for (Course course : courses) {
-            if (course.getCourseId().equals(courseId)) {
-                // Assuming Course class has setters for updating its fields
+        courses.stream()
+            .filter(course -> course.getCourseId().equals(courseId))
+            .findFirst()
+            .ifPresent(course -> {
                 course.setCourseName(newCourseData.getCourseName());
                 course.setMaxStudents(newCourseData.getMaxStudents());
-                // ... Update other fields as necessary
-                break;
-            }
-        }
+                // Add other setters as necessary
+            });
     }
 
+    @Override
     public void displayCourseInfo(String courseId) {
-        // Find the course and print its details
-        for (Course course : courses) {
-            if (course.getCourseId().equals(courseId)) {
-                // Print course details
-                System.out.println("Course Name: " + course.getCourseName());
-                System.out.println("Course ID: " + course.getCourseId());
-                // ... Print other details as necessary
-                break;
-            }
-        }
+        courses.stream()
+            .filter(course -> course.getCourseId().equals(courseId))
+            .findFirst()
+            .ifPresent(course -> {
+                // Assuming Course class has a method to display info
+                course.displayCourseInfo();
+            });
     }
 
+    @Override
     public void registerStudent(Student student) {
-        if (students == null) {
-            students = new ArrayList<>(); // Initialize if null
-        }
-        students.add(student); // Add the student to the list
+        students.add(student);
     }
 
-    // ... Implement other methods as required by AdminInterface
+    // Implement other methods as required by AdminInterface...
 }

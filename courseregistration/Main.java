@@ -23,6 +23,16 @@ public class Main {
         }
         return courses;
     }
+    
+    private static boolean authenticateAdmin(Scanner scanner, Admin admin) {
+        System.out.print("Enter admin username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter admin password: ");
+        String password = scanner.nextLine();
+        
+        return admin.getUsername().equals(username) && admin.getPassword().equals(password);
+    }
+
 
     private static void handleAdminActions(Scanner scanner, Admin admin, List<Course> courses) {
         int choice;
@@ -166,13 +176,12 @@ public class Main {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        Admin admin = new Admin("admin", "admin123", "Admin", "Administrator");
-        Student student = new Student("student", "student123", "Student", "Learner");
         List<Course> courses = new ArrayList<>();
+        Admin admin = new Admin();
+        Student student = null; // Placeholder for the logged-in student
 
         try {
-            courses = loadCoursesFromCSV("C:\\Users\\bhavi\\OneDrive\\Documents\\Varsity\\Anna\\Course-Registration-System\\courseregistration\\MyUniversityCourses.csv"); // Adjust the path if needed
-            // courses.forEach(course -> System.out.println(course.getCourseName())); // For testing purposes
+            courses = loadCoursesFromCSV("MyUniversityCourses.csv"); // Make sure the path is correct
         } catch (IOException e) {
             System.err.println("Error loading courses from CSV.");
             e.printStackTrace();
@@ -180,25 +189,30 @@ public class Main {
 
         boolean exit = false;
         while (!exit) {
-            System.out.println("Are you an Admin or Student? (Enter 'Admin', 'Student', or 'Quit' to exit): ");
+            System.out.print("Are you an Admin or Student? (Enter 'Admin', 'Student', or 'Quit' to exit): ");
             String role = scanner.nextLine();
 
-            switch (role.toLowerCase()) {
-                case "admin":
+            if ("Admin".equalsIgnoreCase(role)) {
+                boolean authenticated = authenticateAdmin(scanner, admin);
+                if (authenticated) {
                     handleAdminActions(scanner, admin, courses);
-                    break;
-                case "student":
-                    handleStudentActions(scanner, student, courses);
-                    break;
-                case "quit":
-                    exit = true;
-                    break;
-                default:
-                    System.out.println("Invalid role. Please try again.");
+                } else {
+                    System.out.println("Incorrect username or password for admin.");
+                }
+            } else if ("Student".equalsIgnoreCase(role)) {
+                // This is where you would authenticate the student
+                // For now, we will just create a new student for demonstration purposes
+                student = new Student("student", "student123", "StudentFirstName", "StudentLastName");
+                handleStudentActions(scanner, student, courses);
+            } else if ("Quit".equalsIgnoreCase(role)) {
+                exit = true;
+            } else {
+                System.out.println("Invalid role. Please try again.");
             }
         }
 
         scanner.close();
         System.out.println("Exiting Course Registration System.");
     }
+
 }
