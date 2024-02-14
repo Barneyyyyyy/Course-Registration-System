@@ -86,7 +86,12 @@ public class Main {
         System.out.println("Exiting Course Registration System.");
     }
 
-    private static Student authenticateStudent(String username, String password) {
+    private static List<Student> loadStateStudents() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private static Student authenticateStudent(String username, String password) {
         for (Student student : predefinedStudents) {
             if (student.getUsername().equals(username) && student.getPassword().equals(password)) {
                 return student;
@@ -110,32 +115,37 @@ public class Main {
         return courses;
     }
 
-
-	@SuppressWarnings("unchecked")
+	
+	@SuppressWarnings({ "unchecked", "unused" })
 	private static List<Course> loadStateCourses() throws IOException, ClassNotFoundException {
-        File file = new File(COURSES_FILE);
-        if (file.exists()) {
-            return (List<Course>) SerializationUtil.deserialize(COURSES_FILE);
-        } else {
-            return new ArrayList<>(); // Empty list if the file does not exist
-        }
-    }
+	    File file = new File(COURSES_FILE);
+	    if (file.exists()) {
+	        List<Course> courses = (List<Course>) SerializationUtil.deserialize(COURSES_FILE);
+	        // Ensure that enrolledStudents list in each course is not null
+	        for (Course course : courses) {
+	            if (course.getEnrolledStudents() == null) {
+	                course.setEnrolledStudents(new ArrayList<>());
+	            }
+	            // Ensure other attributes are properly initialized if needed
+	        }
+	        return courses;
+	    } else {
+	        return new ArrayList<>(); // Empty list if the file does not exist
+	    }
+	}
 
-    @SuppressWarnings("unchecked")
-	private static List<Student> loadStateStudents() throws IOException, ClassNotFoundException {
-        File file = new File(STUDENTS_FILE);
-        if (file.exists()) {
-            return (List<Student>) SerializationUtil.deserialize(STUDENTS_FILE);
-        } else {
-            return new ArrayList<>(); // Empty list if the file does not exist
-        }
-    }
-
-    private static void saveState(List<Course> courses, List<Student> students) throws IOException {
-        SerializationUtil.serialize(courses, COURSES_FILE);
-        SerializationUtil.serialize(students, STUDENTS_FILE);
-    }
-
+	private static void saveState(List<Course> courses, List<Student> students) throws IOException {
+	    // First, ensure that the enrolledStudents list in each course is not null before serialization
+	    for (Course course : courses) {
+	        if (course.getEnrolledStudents() == null) {
+	            course.setEnrolledStudents(new ArrayList<Student>());
+	        }
+	    }
+	    // Then, serialize the courses and students lists
+	    SerializationUtil.serialize(courses, COURSES_FILE);
+	    SerializationUtil.serialize(students, STUDENTS_FILE);
+	}
+	  
     @SuppressWarnings("unused")
 	private static boolean authenticateAdmin(Scanner scanner, Admin admin) {
         System.out.print("Enter admin username: ");
@@ -158,7 +168,6 @@ public class Main {
     }
 
 
-@SuppressWarnings("unused")
 private static void handleAdminActions(Scanner scanner, Admin admin, List<Course> courses, List<Student> students) throws IOException {
     int choice;
     do {
@@ -288,9 +297,11 @@ private static void handleAdminActions(Scanner scanner, Admin admin, List<Course
             if (studentInfo.length == 4 && courseToRegister != null) {
                 if (courseToRegister.getCurrentNumStudents() < courseToRegister.getMaxStudents()) {
                     Student newStudent = new Student(studentInfo[0].trim(), studentInfo[1].trim(), studentInfo[2].trim(), studentInfo[3].trim());
-                    students.add(newStudent); // Add student to the list of students
-                    courseToRegister.getCurrentNumStudents(); // Update the course's current number of students
                     courseToRegister.addStudent(newStudent); // Add the student to the course's enrolled students list
+                    if (students == null) {
+                        students = new ArrayList<>(); // Initialize the list if it's null
+                    }
+                    students.add(newStudent); // Add student to the list of students
                     System.out.println("Student successfully registered for the course.");
                     saveState(courses, students); // Save the updated state
                 } else {
@@ -304,6 +315,7 @@ private static void handleAdminActions(Scanner scanner, Admin admin, List<Course
                 }
             }
             break;
+
 
         case 6:
             System.out.println("All courses:");
@@ -365,6 +377,7 @@ private static void handleAdminActions(Scanner scanner, Admin admin, List<Course
                 System.out.println("Student not found.");
             }
             break;
+
 
         case 11:
             // Sort courses by current enrollment and display

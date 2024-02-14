@@ -10,10 +10,8 @@ public class Course implements Serializable {
     private String courseName;
     private String courseId;
     private int maxStudents;
-    private int currentNumStudents;
     private List<Student> enrolledStudents;
-    private List<String> studentNames;
-
+    private List<String> studentNames = new ArrayList<>(); // Initialize here to avoid null
     private String courseInstructor;
     private int sectionNumber;
     private String location;
@@ -22,9 +20,7 @@ public class Course implements Serializable {
         this.courseName = courseName;
         this.courseId = courseId;
         this.maxStudents = maxStudents;
-        this.currentNumStudents = 0;
-        this.enrolledStudents = new ArrayList<>(); // Initialize the enrolledStudents list
-        this.studentNames = new ArrayList<>();
+        this.enrolledStudents = new ArrayList<>();
         this.courseInstructor = courseInstructor;
         this.sectionNumber = sectionNumber;
         this.location = location;
@@ -57,35 +53,40 @@ public class Course implements Serializable {
     }
 
     public int getCurrentNumStudents() {
-        return currentNumStudents;
+        return enrolledStudents.size(); // Returns the size of the enrolledStudents list
+    }
+    
+    public List<Student> getEnrolledStudents() {
+        return enrolledStudents;
     }
 
-    public List<String> getStudentNames() {
-        List<String> names = new ArrayList<>();
-        for (Student student : enrolledStudents) {
-            names.add(student.getFirstName() + " " + student.getLastName());
-        }
-        return names;
+    public void setEnrolledStudents(List<Student> enrolledStudents) {
+        this.enrolledStudents = enrolledStudents;
     }
+
+    
 
     public void addStudent(Student student) {
         if (enrolledStudents.size() < maxStudents) {
             enrolledStudents.add(student);
             studentNames.add(student.getFirstName() + " " + student.getLastName());
-            currentNumStudents++;
         } else {
             System.out.println("Course is full. Cannot add more students.");
         }
     }
 
+
     public void removeStudent(Student student) {
         if (enrolledStudents.contains(student)) {
             enrolledStudents.remove(student);
             studentNames.remove(student.getFirstName() + " " + student.getLastName());
-            currentNumStudents--;
         } else {
             System.out.println("Student not found in this course.");
         }
+    }
+    
+    public List<String> getStudentNames() {
+        return new ArrayList<>(studentNames); // Returns a copy of the studentNames list to prevent external modifications.
     }
 
     public String getCourseInstructor() {
@@ -111,14 +112,19 @@ public class Course implements Serializable {
     public void setLocation(String location) {
         this.location = location;
     }
+    
+    
 
-    // Additional methods
+ // Additional methods
     public void displayCourseInfo() {
         System.out.println("Course Name: " + courseName);
         System.out.println("Course ID: " + courseId);
         System.out.println("Instructor: " + courseInstructor);
         System.out.println("Section Number: " + sectionNumber);
         System.out.println("Location: " + location);
-        System.out.println("Enrolled Students: " + currentNumStudents + "/" + maxStudents);
+        System.out.println("Enrolled Students: " + enrolledStudents.size() + "/" + maxStudents);
     }
+
+
+	
 }
