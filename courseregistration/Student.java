@@ -12,25 +12,26 @@ public class Student extends User implements StudentInterface {
         this.enrolledCourses = new ArrayList<>();
     }
 
-    public void registerForCourse(Course course) {
+    public void registerForCourse(Course course, Student student) {
         if (course.getCurrentNumStudents() < course.getMaxStudents()) {
             enrolledCourses.add(course);
-            course.incrementCurrentNumStudents();
+            // course.incrementCurrentNumStudents();
+            course.addStudent(student);
         } else {
             System.out.println("Course is full. Cannot enroll.");
         }
     }
 
-    public void withdrawFromCourse(Course course) {
+    public void withdrawFromCourse(Course course, Student student) {
         if (enrolledCourses.contains(course)) {
             enrolledCourses.remove(course);
-            course.decrementCurrentNumStudents();
+            // course.decrementCurrentNumStudents();
+            course.removeStudent(student);
         } else {
             System.out.println("You are not enrolled in this course.");
         }
     }
 
-   
     public void viewEnrolledCourses() {
         if (enrolledCourses.isEmpty()) {
             System.out.println("You are not enrolled in any courses.");
