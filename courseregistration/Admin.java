@@ -1,5 +1,6 @@
 package courseregistration;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,9 @@ public class Admin extends User implements AdminInterface {
     // Hardcoded admin credentials for simplicity as per requirements
     private static final String HARDCODED_USERNAME = "Admin";
     private static final String HARDCODED_PASSWORD = "Admin001";
+    
+    private static final String COURSES_FILE = "courses.ser";
+    private static final String STUDENTS_FILE = "students.ser";
 
     // Admin class constructor
     public Admin() {
@@ -31,8 +35,19 @@ public class Admin extends User implements AdminInterface {
     @Override
     public void createCourse(Course course) {
         courses.add(course);
+        saveState();
     }
-
+    
+    private void saveState() {
+        try {
+            SerializationUtil.serialize(courses, COURSES_FILE);
+            SerializationUtil.serialize(students, STUDENTS_FILE);
+        } catch (IOException e) {
+            System.err.println("Error saving data: " + e.getMessage());
+            // Handle the error appropriately
+        }
+    }
+    
     @Override
     public void deleteCourse(String courseId) {
         courses.removeIf(course -> course.getCourseId().equals(courseId));
@@ -48,6 +63,22 @@ public class Admin extends User implements AdminInterface {
                 course.setMaxStudents(newCourseData.getMaxStudents());
                 // Add other setters as necessary
             });
+    }
+    
+    public void setCourses(List<Course> courses) {
+        this.courses = courses;
+    }
+
+    public void setStudents(List<Student> students) {
+        this.students = students;
+    }
+
+    public List<Course> getCourses() {
+        return courses;
+    }
+
+    public List<Student> getStudents() {
+        return students;
     }
 
     @Override

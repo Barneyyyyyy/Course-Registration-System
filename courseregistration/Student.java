@@ -40,4 +40,8 @@ public class Student extends User implements StudentInterface {
             System.out.println(course.getCourseName() + " - " + course.getCourseId());
         }
     }
+
+    public List<Course> getEnrolledCourses() {
+        return enrolledCourses;
+    }
 }
