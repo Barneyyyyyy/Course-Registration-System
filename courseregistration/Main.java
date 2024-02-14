@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Main {
     // Constants for file paths
@@ -184,7 +185,15 @@ private static void handleAdminActions(Scanner scanner, Admin admin, List<Course
             String courseDetails = scanner.nextLine();
             String[] details = courseDetails.split(","); // Expecting user to input comma-separated values
             if (details.length == 6) {
-                Course newCourse = new Course(details[0], details[1], Integer.parseInt(details[2]), details[3], Integer.parseInt(details[4]), details[5]);
+                // Trim each detail to remove leading and trailing spaces
+                String courseName = details[0].trim();
+                String courseId = details[1].trim();
+                int maxStudents = Integer.parseInt(details[2].trim()); // Trim and parse to int
+                String instructor = details[3].trim();
+                int sectionNumber = Integer.parseInt(details[4].trim()); // Trim and parse to int
+                String location = details[5].trim();
+
+                Course newCourse = new Course(courseName, courseId, maxStudents, instructor, sectionNumber, location);
                 courses.add(newCourse);
                 System.out.println("New course created successfully.");
                 saveState(courses, students); // Save state after adding new course
@@ -192,6 +201,7 @@ private static void handleAdminActions(Scanner scanner, Admin admin, List<Course
                 System.out.println("Invalid course details provided.");
             }
             break;
+
         case 2:
             // Delete a course
             System.out.println("Enter the course ID to delete:");
@@ -207,28 +217,91 @@ private static void handleAdminActions(Scanner scanner, Admin admin, List<Course
         case 3:
             // Edit a course
             System.out.println("Enter the course ID to edit:");
-            String courseIdToEdit = scanner.nextLine();
-            Course courseToEdit = courses.stream().filter(course -> course.getCourseId().equals(courseIdToEdit)).findFirst().orElse(null);
+            String courseIdToEdit = scanner.nextLine().trim(); // Trim input for any leading or trailing spaces
+            Course courseToEdit = courses.stream()
+                                          .filter(course -> course.getCourseId().equals(courseIdToEdit))
+                                          .findFirst()
+                                          .orElse(null); // Find the course or return null if not found
+
             if (courseToEdit != null) {
-                // Assuming you have logic here to prompt for and handle new details
-                System.out.println("Course edited successfully.");
-                saveState(courses, students); // Save state after editing course
+                // Prompt for new details (not including ID and name)
+                System.out.println("Editing Course: " + courseToEdit.getCourseName());
+                System.out.print("Enter new max number of students (Current: " + courseToEdit.getMaxStudents() + "): ");
+                int newMaxStudents = Integer.parseInt(scanner.nextLine().trim());
+                System.out.print("Enter new instructor name (Current: " + courseToEdit.getCourseInstructor() + "): ");
+                String newInstructor = scanner.nextLine().trim();
+                System.out.print("Enter new section number (Current: " + courseToEdit.getSectionNumber() + "): ");
+                int newSectionNumber = Integer.parseInt(scanner.nextLine().trim());
+                System.out.print("Enter new location (Current: " + courseToEdit.getLocation() + "): ");
+                String newLocation = scanner.nextLine().trim();
+
+                // Update the course details
+                courseToEdit.setMaxStudents(newMaxStudents);
+                courseToEdit.setCourseInstructor(newInstructor);
+                courseToEdit.setSectionNumber(newSectionNumber);
+                courseToEdit.setLocation(newLocation);
+
+                System.out.println("Course details updated successfully.");
+                // Optionally, save the updated courses list to persist changes
+                saveState(courses, students);
             } else {
-                System.out.println("Course ID not found.");
+                System.out.println("Course with ID '" + courseIdToEdit + "' not found.");
+            }
+            break;
+            
+        case 4:
+            // Display course information
+            System.out.println("Enter the course ID for which you want to display information:");
+            String courseIdToDisplay = scanner.nextLine();
+            Course courseToDisplay = courses.stream()
+                                             .filter(course -> course.getCourseId().equals(courseIdToDisplay))
+                                             .findFirst()
+                                             .orElse(null); // Find the course with the given ID or return null if not found
+
+            if (courseToDisplay != null) {
+                // Display the found course's details
+                System.out.println("Course Details:");
+                System.out.println("Name: " + courseToDisplay.getCourseName());
+                System.out.println("ID: " + courseToDisplay.getCourseId());
+                System.out.println("Maximum Students: " + courseToDisplay.getMaxStudents());
+                System.out.println("Current Enrolled: " + courseToDisplay.getCurrentNumStudents());
+                System.out.println("Instructor: " + courseToDisplay.getCourseInstructor());
+                System.out.println("Section Number: " + courseToDisplay.getSectionNumber());
+                System.out.println("Location: " + courseToDisplay.getLocation());
+                // If you're maintaining a list of student names or IDs within the course, you can display them here as well
+            } else {
+                System.out.println("Course with ID '" + courseIdToDisplay + "' not found.");
             }
             break;
         case 5:
-            // Register a student
-            System.out.println("Enter student details (Username, Password, First Name, Last Name) to register:");
+            System.out.println("Enter student details (Username, Password, First Name, Last Name):");
             String studentDetails = scanner.nextLine();
             String[] studentInfo = studentDetails.split(",");
-            if (studentInfo.length == 4) {
-                Student newStudent = new Student(studentInfo[0], studentInfo[1], studentInfo[2], studentInfo[3]);
-                students.add(newStudent); // Assuming admin class has access to students list
-                System.out.println("Student registered successfully.");
-                saveState(courses, students); // Save state after registering student
+            System.out.println("Enter course ID to register the student for:");
+            String courseIdToRegister = scanner.nextLine().trim(); // Get the course ID for registration
+
+            Course courseToRegister = courses.stream()
+                                              .filter(course -> course.getCourseId().equals(courseIdToRegister))
+                                              .findFirst()
+                                              .orElse(null);
+
+            if (studentInfo.length == 4 && courseToRegister != null) {
+                if (courseToRegister.getCurrentNumStudents() < courseToRegister.getMaxStudents()) {
+                    Student newStudent = new Student(studentInfo[0].trim(), studentInfo[1].trim(), studentInfo[2].trim(), studentInfo[3].trim());
+                    students.add(newStudent); // Add student to the list of students
+                    courseToRegister.getCurrentNumStudents(); // Update the course's current number of students
+                    courseToRegister.addStudent(newStudent); // Add the student to the course's enrolled students list
+                    System.out.println("Student successfully registered for the course.");
+                    saveState(courses, students); // Save the updated state
+                } else {
+                    System.out.println("Course is full. Cannot register the student.");
+                }
             } else {
-                System.out.println("Invalid student details provided.");
+                if (studentInfo.length != 4) {
+                    System.out.println("Invalid student details provided.");
+                } else {
+                    System.out.println("Course not found.");
+                }
             }
             break;
 
@@ -238,10 +311,16 @@ private static void handleAdminActions(Scanner scanner, Admin admin, List<Course
             break;
         case 7:
             System.out.println("Full courses:");
-            courses.stream()
-                   .filter(course -> course.getCurrentNumStudents() == course.getMaxStudents())
-                   .forEach(Course::displayCourseInfo); // Display full courses
+            List<Course> fullCourses = courses.stream()
+                                              .filter(course -> course.getCurrentNumStudents() == course.getMaxStudents())
+                                              .collect(Collectors.toList());
+            if (fullCourses.isEmpty()) {
+                System.out.println("There are no full courses.");
+            } else {
+                fullCourses.forEach(Course::displayCourseInfo);
+            }
             break;
+
         case 8:
             // Write full courses to a file
             try {
@@ -263,18 +342,30 @@ private static void handleAdminActions(Scanner scanner, Admin admin, List<Course
                        () -> System.out.println("Course not found.")
                    );
             break;
+
         case 10:
-            // View courses a student is registered in
             System.out.println("Enter student's first name and last name:");
-            String studentName = scanner.nextLine();
-            students.stream()
-                    .filter(student -> (student.getFirstName() + " " + student.getLastName()).equals(studentName))
-                    .findFirst()
-                    .ifPresentOrElse(
-                        student -> student.getEnrolledCourses().forEach(course -> System.out.println(course.getCourseName() + " - " + course.getCourseId())),
-                        () -> System.out.println("Student not found.")
-                    );
+            String[] nameParts = scanner.nextLine().trim().split(" ", 2);
+            String firstName = nameParts[0];
+            String lastName = nameParts.length > 1 ? nameParts[1] : "";
+
+            Optional<Student> foundStudent = students.stream()
+                                                     .filter(student -> student.getFirstName().equalsIgnoreCase(firstName) && student.getLastName().equalsIgnoreCase(lastName))
+                                                     .findFirst();
+
+            if (foundStudent.isPresent()) {
+                System.out.println(firstName + " " + lastName + " is registered in the following courses:");
+                List<Course> enrolledCourses = foundStudent.get().getEnrolledCourses();
+                if (enrolledCourses.isEmpty()) {
+                    System.out.println("This student is not registered in any courses.");
+                } else {
+                    enrolledCourses.forEach(course -> System.out.println(course.getCourseName() + " - " + course.getCourseId()));
+                }
+            } else {
+                System.out.println("Student not found.");
+            }
             break;
+
         case 11:
             // Sort courses by current enrollment and display
             courses.sort(Comparator.comparingInt(Course::getCurrentNumStudents).reversed());

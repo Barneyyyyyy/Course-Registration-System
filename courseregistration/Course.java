@@ -11,25 +11,26 @@ public class Course implements Serializable {
     private String courseId;
     private int maxStudents;
     private int currentNumStudents;
-    private List<String> studentNames; // Storing student names/IDs
+    private List<Student> enrolledStudents;
+    private List<String> studentNames;
+
     private String courseInstructor;
     private int sectionNumber;
     private String location;
 
-    // Constructor
-    public Course(String courseName, String courseId, int maxStudents, String courseInstructor,
-                  int sectionNumber, String location) {
+    public Course(String courseName, String courseId, int maxStudents, String courseInstructor, int sectionNumber, String location) {
         this.courseName = courseName;
         this.courseId = courseId;
         this.maxStudents = maxStudents;
-        this.currentNumStudents = 0; // Initialize with zero students registered
+        this.currentNumStudents = 0;
+        this.enrolledStudents = new ArrayList<>(); // Initialize the enrolledStudents list
         this.studentNames = new ArrayList<>();
         this.courseInstructor = courseInstructor;
         this.sectionNumber = sectionNumber;
         this.location = location;
     }
 
-    // Getters and Setters
+    // Getters and setters
 
     public String getCourseName() {
         return courseName;
@@ -59,16 +60,32 @@ public class Course implements Serializable {
         return currentNumStudents;
     }
 
-    public void setCurrentNumStudents(int currentNumStudents) {
-        this.currentNumStudents = currentNumStudents;
-    }
-
     public List<String> getStudentNames() {
-        return studentNames;
+        List<String> names = new ArrayList<>();
+        for (Student student : enrolledStudents) {
+            names.add(student.getFirstName() + " " + student.getLastName());
+        }
+        return names;
     }
 
-    public void setStudentNames(List<String> studentNames) {
-        this.studentNames = studentNames;
+    public void addStudent(Student student) {
+        if (enrolledStudents.size() < maxStudents) {
+            enrolledStudents.add(student);
+            studentNames.add(student.getFirstName() + " " + student.getLastName());
+            currentNumStudents++;
+        } else {
+            System.out.println("Course is full. Cannot add more students.");
+        }
+    }
+
+    public void removeStudent(Student student) {
+        if (enrolledStudents.contains(student)) {
+            enrolledStudents.remove(student);
+            studentNames.remove(student.getFirstName() + " " + student.getLastName());
+            currentNumStudents--;
+        } else {
+            System.out.println("Student not found in this course.");
+        }
     }
 
     public String getCourseInstructor() {
@@ -95,38 +112,7 @@ public class Course implements Serializable {
         this.location = location;
     }
 
- // Additional methods
-    public void incrementCurrentNumStudents() {
-        if (currentNumStudents < maxStudents) {
-            currentNumStudents++;
-        }
-    }
-
-    public void decrementCurrentNumStudents() {
-        if (currentNumStudents > 0) {
-            currentNumStudents--;
-        }
-    }
-
-    public void addStudent(String studentName) {
-        if (currentNumStudents < maxStudents) {
-            studentNames.add(studentName);
-            incrementCurrentNumStudents();
-        } else {
-            System.out.println("Course is full. Cannot add more students.");
-        }
-    }
-
-    public void removeStudent(String studentName) {
-        if (studentNames.contains(studentName)) {
-            studentNames.remove(studentName);
-            decrementCurrentNumStudents();
-        } else {
-            System.out.println("Student not found in this course.");
-        }
-    }
-
-    // Method to display course details
+    // Additional methods
     public void displayCourseInfo() {
         System.out.println("Course Name: " + courseName);
         System.out.println("Course ID: " + courseId);
@@ -135,5 +121,4 @@ public class Course implements Serializable {
         System.out.println("Location: " + location);
         System.out.println("Enrolled Students: " + currentNumStudents + "/" + maxStudents);
     }
-
 }
