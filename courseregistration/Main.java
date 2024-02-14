@@ -416,18 +416,25 @@ private static void handleStudentActions(Scanner scanner, Student student, List<
                         .forEach(Course::displayCourseInfo);
                 break;
             case 3:
-                System.out.println("Enter course ID and section: ");
-                String courseId = scanner.nextLine();
-                String section = scanner.nextLine(); // Assuming section is needed for identification
-                Optional<Course> courseToRegister = courses.stream()
-                        .filter(course -> course.getCourseId().equals(courseId) && String.valueOf(course.getSectionNumber()).equals(section))
-                        .findFirst();
-                if (courseToRegister.isPresent()) {
-                    student.registerForCourse(courseToRegister.get());
-                    System.out.println("Registered successfully.");
-                } else {
-                    System.out.println("Course not found or full.");
-                }
+            	System.out.println("Enter course ID and section (format: CourseID,Section):");
+            	String[] inputParts = scanner.nextLine().trim().split(",");
+            	if(inputParts.length == 2) {
+            	    String courseId = inputParts[0].trim();
+            	    String section = inputParts[1].trim();
+            	    Optional<Course> courseToRegister = courses.stream()
+            	            .filter(course -> course.getCourseId().equals(courseId) && String.valueOf(course.getSectionNumber()).equals(section))
+            	            .findFirst();
+            	    if(courseToRegister.isPresent()) {
+            	        // Registration logic here
+            	        student.registerForCourse(courseToRegister.get());
+            	        System.out.println("Registered successfully.");
+            	    } else {
+            	        System.out.println("Course not found or full.");
+            	    }
+            	} else {
+            	    System.out.println("Invalid input format. Please use the format CourseID,Section.");
+            	}
+
                 break;
             case 4:
                 System.out.println("Enter course ID to withdraw from: ");
